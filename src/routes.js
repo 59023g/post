@@ -9,32 +9,21 @@ module.exports = async function routes( path, req, res ) {
 
       let parsedData =[]
 
-      var valueStream = db.createValueStream()
-      valueStream.on('error', function (err) {
-        console.error('valueStream.on error ' + err.message);
-      });
-      valueStream.pipe( send( res, 200, parsedData ) );
-      response('error', function (err) {
-        console.error('response error ' + err.message);
-      });
-      //
-      //  db.createReadStream({ reverse: true })
-      //  .on('data', function (data) {
-      //     parsedData.push( data )
-      //   })
-      //   .on('error', function (err) {
-      //     console.log('Oh my!', err)
-      //   })
-      //   .on('close', function () {
-      //     console.log('Stream closed')
-      //   })
-      //   .on('end', function (data) {
-      //     console.log('Stream ended')
-      //     send( res, 200, parsedData )
-       //
-      //   })
-        // console.log('data', streamdata)
-      // .pipe( send( res, 200, data ) )
+       db.createReadStream({ reverse: true })
+       .on('data', function (data) {
+          parsedData.push( data )
+        })
+        .on('error', function (err) {
+          console.log('Oh my!', err)
+        })
+        .on('close', function () {
+          console.log('Stream closed')
+        })
+        .on('end', function (data) {
+          console.log('Stream ended')
+          send( res, 200, data )
+
+        })
       break;
     case '/admin':
       break;
