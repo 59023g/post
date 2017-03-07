@@ -9,7 +9,7 @@ const json = require( 'micro' ).json;
 const routes = require( './routes.js' )
 
 // database
-const db = require( '../db.js')
+const db = require( '../db.js' )
 
 // util
 const qs = require( 'querystring' )
