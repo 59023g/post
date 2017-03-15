@@ -19,10 +19,6 @@ const url = require( 'url' )
 const parse = require( 'urlencoded-body-parser' );
 
 
-
-
-
-
 async function getHandler( req, res, parsed ) {
 
   try {
@@ -33,24 +29,26 @@ async function getHandler( req, res, parsed ) {
 
 }
 
+
 async function postHandler( req, res, parsed ) {
 
-  const data = await parse( req )
+  const content = await parse( req )
 
   switch ( parsed.pathname ) {
     case '/admin/post':
 
-      // create new post object
-      // add items to it
-      // console.log( JSON.stringify( db ) )
-      // await db.put( 'post', 'data' )
+      // POST
+      let author = 'mp'
 
-      let post = {
-        author: 'mp',
-        data
-      }
+      let now = Date.now()
 
-      await db.put( 'post!' + Date.now(), post )
+      await db.put(
+        Date.now() +
+        '!' + now  +
+        '!' + now  +
+        '!' + author,
+        content
+      )
 
       send( res, 200, `${ JSON.stringify( data ) }` )
 
