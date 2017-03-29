@@ -1,109 +1,61 @@
 const config = require( '../config.js' )
 
-// server
-const micro = require( 'micro' );
-const send = require( 'micro' ).send;
-const json = require( 'micro' ).json;
-
-// routes
-const routes = require( './routes.js' )
-
-// database
+// db
 const db = require( '../db.js' )
 
-// util
-const qs = require( 'querystring' )
-const url = require( 'url' )
+// server ( express mostly for the router )
+const app = require( 'express' )();
+const bodyParser = require( 'body-parser' );
+app.use( bodyParser.urlencoded( { extended: true } ) );
+app.use( bodyParser.json() );
 
-// const promisify = require( 'es6-promisify' )
-const parse = require( 'urlencoded-body-parser' );
+app.listen( process.env.PORT )
 
+// views
+const views = require( './views.js' );
 
-async function getHandler( req, res, parsed ) {
+// routes
+app.get( '/', function( req, res ) {
 
-  try {
-    return await routes( parsed.pathname, req, res )
-  } catch ( err ) {
-    throw err
-  }
+  let dataStreamArr = []
 
-}
+  db.createReadStream( {
+      reverse: true
+    } )
+    .on( 'data', function( data ) {
+      dataStreamArr.push( data )
+    } )
+    .on( 'error', function( err ) {
+      console.log( 'Oh my!', err )
+    } )
+    .on( 'close', function() {
+      console.log( 'Stream closed' )
+    } )
+    .on( 'end', function() {
+      console.log( 'Stream ended' )
+      res.send( views.getIndex( dataStreamArr ) )
 
+    } )
 
-async function postHandler( req, res, parsed ) {
+} )
 
-  const content = await parse( req )
+app.get( '/admin/post', ( req, res ) => {
+  res.send( views.getForm() );
+} )
 
-  switch ( parsed.pathname ) {
-    case '/admin/post':
+app.post( '/admin/post', ( req, res ) => {
 
-      // POST
-      let author = 'mp'
+  let content = req.body;
+  let author = 'mp';
+  let now = Date.now();
 
-      let now = Date.now()
+  db.put(
+    now +
+    '+' + now +
+    '+' + author,
+    content
+  )
 
-      await db.put(
-        Date.now() +
-        '!' + now  +
-        '!' + now  +
-        '!' + author,
-        content
-      )
+  res.redirect( 200, '/');
 
-      send( res, 200, `${ JSON.stringify( data ) }` )
-
-      break;
-    default:
-      send( res, 404, {
-        status: 404,
-        message: 'not found'
-      } )
-
-  }
-
-
-
-  try {
-    return await routes( parsed.pathname, req, res )
-  } catch ( err ) {
-    throw err
-  }
-
-}
-
-async function methodHandler( req, res ) {
-  const parsed = url.parse( req.url, true );
-
-  try {
-    switch ( req.method ) {
-      case 'POST':
-        return await postHandler( req, res, parsed );
-      case 'GET':
-        return await getHandler( req, res, parsed );
-      default:
-        send(
-          res, 405, {
-            status: 405,
-            message: 'invalid method'
-          } );
-        break;
-    }
-  } catch ( err ) {
-    throw err
-  }
-
-}
-
-async function start() {
-  server.listen( process.env.PORT );
-}
-
-const server = micro( async( req, res ) => {
-  try {
-    return await methodHandler( req, res );
-  } catch ( err ) {
-    micro.sendError( req, res, err );
-  }
-} );
-
-start()
+} )
