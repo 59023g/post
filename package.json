@@ -8,12 +8,11 @@
     "start": "NODE_ENV=development PORT=8000 node --harmony-async-await --harmony src/index.js"
   },
   "dependencies": {
-    "es6-promisify": "^5.0.0",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
     "hyperlog": "^4.12.1",
     "level": "^1.6.0",
-    "micro": "^7.0.6",
-    "urlencoded-body-parser": "^2.0.0",
-    "websocket-stream": "^3.3.3"
+    "then-levelup": "^1.0.2"
   },
   "author": "",
   "license": "MIT"
