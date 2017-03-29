@@ -1,66 +1,79 @@
+const util = require( './util.js' );
+
   const getFoot = () => {
     return ( ` </body></html>` )
   }
 
   const getHead = () => {
+
+    // todo - selected nav page
     return (
       `
       <html>
       <head>
         <style>
-          body { font-family: monospace }
-          div, .padding-bottom-8 { padding-bottom: 8px }
-
+          body {
+            font-family: monospace;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 12px }
+          div, .padding-bottom-8 { padding-bottom: 8px; }
+          ul { padding: 0; list-style-type: none; }
+          input, textarea { width: 100%; }
+          textarea { height: 100px; }
         </style>
       </head>
       <body>
+      -> <a href="/admin">admin</a>
+      -> <a href="/admin/post">admin/post</a>
+      -> <a href="/">items</a>
+      <br/>
+      <br/>
 
       ` )
   }
 
 
   const getIndex = ( posts ) => {
-
-    // arr of rendered elements
+    // arr of rendered posts
     let list = [];
 
     for ( let post of posts ) {
-      let keyArr = post.key.split( '!' );
-      let createdAt = keyArr[0];
-      let updatedAt = keyArr[1]; // not relevant until 'post'?
-      let author =keyArr[2]; // should this be in value too?
+    console.log( post )
+
+      // parse post
+
+      let keyObj = util.splitKey( post.key );
       let subject = post.value.subject;
       let body = post.value.body;
 
+      // put each post into loop
       list.push(
         `<li>
-          <h4>Author: ${ author } </h4>
-          <h2>Subject: ${ subject } </h5>
-          <p>Body: ${ body } </p>
+          <h4>${ subject } by ${ keyObj.author } on ${ keyObj.updatedAt }</h4>
+          <p> ${ body } </p>
           <p>
-            <a href="${ author }/${ createdAt }/${ updatedAt }">${ author }/${ createdAt }/${ updatedAt }</a>
+            <a href="${ keyObj.author }/${ keyObj.createdAt }/${ keyObj.updatedAt }">${ keyObj.author }/${ keyObj.createdAt }/${ keyObj.updatedAt }</a>
           </p>
         </li>
         `
       )
-
-      // how do i keep selected object loaded on client?
-
-      return (
-      `
-        ${ getHead() }
-        <a href="/admin">->admin</a>
-        <a href="/admin/post">->admin/post</a>
-        <br/>
-        Items
-        <ul>
-          ${ list.join('') }
-        </ul>
-        ${ getFoot() }
-      `
-      )
-
     }
+
+    // how do i keep selected object loaded on client?
+    // is this the right url format?
+    // how will people create custom, subject based urls, but still get what they want? with lookup by subject?
+
+    return (
+    `
+      ${ getHead() }
+      <ul>
+        ${ list.join('') }
+      </ul>
+      ${ getFoot() }
+    `
+    )
+
   }
 
   const getForm = () => {
@@ -77,7 +90,6 @@
               <textarea name='body'></textarea>
             </div>
             <div>
-              subm
               <input type='submit' value='submit'>
             </div>
           </form>
