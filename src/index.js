@@ -1,4 +1,5 @@
-const config = require( '../config.js' )
+const config = require( '../config.js' );
+const util = require( './util.js' );
 
 // db
 const db = require( '../db.js' )
@@ -6,9 +7,10 @@ const db = require( '../db.js' )
 // server ( express mostly for the router )
 const app = require( 'express' )();
 const bodyParser = require( 'body-parser' );
-app.use( bodyParser.urlencoded( { extended: true } ) );
+app.use( bodyParser.urlencoded( {
+  extended: true
+} ) );
 app.use( bodyParser.json() );
-
 app.listen( process.env.PORT )
 
 // views
@@ -35,6 +37,21 @@ app.post( '/admin/post', ( req, res ) => {
   res.redirect( 200, '/' );
 
 } )
+
+// this url is all wildcard
+app.get( '/:author/:createdAt/:updatedAt', ( req, res ) => {
+  console.log( 'params', req.params )
+
+  let createdAt = req.params.createdAt;
+  let updatedAt = req.params.updatedAt;
+  let author = req.params.author;
+  // ideally use local cache for item
+
+  getPost( createdAt, updatedAt )
+
+  res.send( req.params );
+} )
+
 let getPosts = async () => {
 
   // get a key stream
@@ -105,6 +122,36 @@ let getPosts = async () => {
 
   } )
 }
+
+
+
+let getPost = ( createdAt, updatedAt, author ) => {
+
+  let keyList = []
+  db.createKeyStream()
+    .on( 'data', function( rawKey ) {
+
+      let keyArr = rawKey.split( '+' );
+      let keyCreatedAt = keyArr[ 0 ];
+      let keyUpdatedAt = keyArr[ 1 ];
+      // if first key val equals param, then return latest second key value
+
+      // assumes updatedAt is latest and one we want. coming from index array not currently displaying latest
+      if ( keyCreatedAt === createdAt &&
+        keyUpdatedAt === updatedAt ) {
+        keyList.push( rawKey )
+      }
+    } )
+    .on( 'end', function() {
+      console.log( 'Stream ended' )
+
+      console.log( 'keyList', keyList )
+
+      // res.send( views.getIndex( dataStreamArr ) )
+
+    } )
+}
+
 let newPost = ( req ) => {
 
   let content = req.body;
