@@ -14,28 +14,13 @@ app.listen( process.env.PORT )
 // views
 const views = require( './views.js' );
 
+
 // routes
-app.get( '/', function( req, res ) {
+app.get( '/', async function( req, res ) {
 
-  let dataStreamArr = []
+  let results = await getPosts();
+  res.send( views.getIndex( results ) );
 
-  db.createReadStream( {
-      reverse: true
-    } )
-    .on( 'data', function( data ) {
-      dataStreamArr.push( data )
-    } )
-    .on( 'error', function( err ) {
-      console.log( 'Oh my!', err )
-    } )
-    .on( 'close', function() {
-      console.log( 'Stream closed' )
-    } )
-    .on( 'end', function() {
-      console.log( 'Stream ended' )
-      res.send( views.getIndex( dataStreamArr ) )
-
-    } )
 
 } )
 
