@@ -5,14 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "",
-    "start": "NODE_ENV=development PORT=8000 node --harmony-async-await --harmony src/index.js"
+    "start": "PORT=8000 node --harmony-async-await --harmony src/index.js",
+    "dev": " PORT=8000 supervisor --w --harmony -- src/index.js "
   },
   "dependencies": {
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
-    "hyperlog": "^4.12.1",
-    "level": "^1.6.0",
-    "then-levelup": "^1.0.2"
+    "level": "^1.6.0"
   },
   "author": "",
   "license": "MIT"
