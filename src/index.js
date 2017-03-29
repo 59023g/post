@@ -45,6 +45,11 @@ app.get( '/admin/post', ( req, res ) => {
 
 app.post( '/admin/post', ( req, res ) => {
 
+  newPost( req );
+  // then
+  res.redirect( 200, '/' );
+
+} )
 let getPosts = async () => {
 
   // get a key stream
@@ -115,6 +120,8 @@ let getPosts = async () => {
 
   } )
 }
+let newPost = ( req ) => {
+
   let content = req.body;
   let author = 'mp';
   let now = Date.now();
@@ -126,6 +133,5 @@ let getPosts = async () => {
     content
   )
 
-  res.redirect( 200, '/');
-
-} )
+  // return success for async
+}
