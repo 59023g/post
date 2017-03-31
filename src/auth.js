@@ -2,7 +2,7 @@
 const config = require( '../config.js' );
 const util = require( './util.js' );
 
-const db = require( '../db.js' )
+const usersDb = require( '../db.js' ).usersDb
 
 const secrets = require( '../secrets.js' );
 
@@ -16,16 +16,16 @@ const createUser = async( req, res ) => {
   if ( user === '' || pass === '' ) {
     // TODO dry responses
     // TODO tests
-    res.status( 200 );
+    res.status( 401 );
     res.json( {
       'status': 401
     } )
     return
   }
 
-  console.log( user, pass )
+  return new Promise( ( resolve, reject ) => {
 
-  db.put(
+  usersDb.put(
     user +
     '+' + now +
     '+' + now, {
@@ -37,16 +37,21 @@ const createUser = async( req, res ) => {
       }
     },
     ( err ) => {
-      if ( err ) return console.log( 'err', err )
-      // return Promise.resolve()
+      if ( err ) return reject( 'err', err )
+      res.status( 200 );
+      res.json( {
+        'status': 200
+      } )
+      resolve()
     }
   )
+})
 
 }
 
 const login = async( req, res ) => {
   let user = req.body.user || '';
-  let pass = req.body.pass || '';im
+  let pass = req.body.pass || '';
 
   if ( user === '' || pass === '' ) {
     res.status( 401 );
@@ -56,7 +61,7 @@ const login = async( req, res ) => {
     return
   }
 
-  db.createReadStream()
+  usersDb.createReadStream()
     .on( 'data', function( item ) {
 
       console.log( 'tiem', item )
