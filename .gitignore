@@ -1,4 +1,4 @@
 node_modules
 db
-user_db
 npm-debug.log
+secrets.js
