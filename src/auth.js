@@ -6,6 +6,18 @@ const usersDb = require( '../db.js' ).usersDb
 
 const secrets = require( '../secrets.js' );
 
+const deleteUser = async( req, res ) => {
+  // let key =
+
+  usersDb.del( '', ( err ) => {
+    console.log( 'del' )
+  } )
+
+
+}
+
+const updateUser = '';
+
 const createUser = async( req, res ) => {
 
   let now = Date.now();
@@ -25,27 +37,27 @@ const createUser = async( req, res ) => {
 
   return new Promise( ( resolve, reject ) => {
 
-  usersDb.put(
-    user +
-    '+' + now +
-    '+' + now, {
-      user: user,
-      pass: pass,
-      email: email,
-      bio: {
-        name: 'mp'
+    usersDb.put(
+      now +
+      '+' + now +
+      '+' + user, {
+        user: user,
+        pass: pass,
+        email: email,
+        bio: {
+          name: ''
+        }
+      },
+      ( err ) => {
+        if ( err ) return reject( 'err', err )
+        res.status( 200 );
+        res.json( {
+          'status': 200
+        } )
+        resolve()
       }
-    },
-    ( err ) => {
-      if ( err ) return reject( 'err', err )
-      res.status( 200 );
-      res.json( {
-        'status': 200
-      } )
-      resolve()
-    }
-  )
-})
+    )
+  } )
 
 }
 
@@ -61,16 +73,39 @@ const login = async( req, res ) => {
     return
   }
 
+  let allAuthorItems = [];
+
   usersDb.createReadStream()
     .on( 'data', function( item ) {
-
-      console.log( 'tiem', item )
+      // do the generic split key
+      let keyObj = util.splitKey( item.key );
+      // if author matches key, push to array for later check
+      if ( user === keyObj.author ) {
+        allAuthorItems.push( Object.assign( keyObj, item.value ) );
+      }
     } )
     .on( 'error', function( err ) {
       reject( err )
     } )
     .on( 'end', function() {
-      // resolve( allItemsFilteredByCreatedAt )
+
+
+      // sort by descending updatedAt, so latest is in 0
+      allAuthorItems.sort( util.sortDescUpdatedAt )
+
+      let latestAuthorItem = allAuthorItems[ 0 ]
+      if ( latestAuthorItem.pass === pass ) {
+        // latest user item password matches
+        // send token to client
+        console.log('success')
+      } else {
+        // latest user item password does not match
+        console.log( 'fail')
+      }
+
+
+
+
     } )
 
 
@@ -79,7 +114,9 @@ const login = async( req, res ) => {
 }
 
 
+
 module.exports = {
   login: login,
-  createUser: createUser
+  createUser: createUser,
+  deleteUser: deleteUser
 }
