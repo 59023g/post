@@ -1,11 +1,9 @@
-const config = require( '../config.js' );
-
 const lastArr = ( arr ) => {
   return arr[arr.length - 1 ];
 }
 
 const splitKey = ( key ) => {
-  let keyArr = key.split( config.splitValue );
+  let keyArr = key.split( process.env.SPLIT_VALUE );
 
   let keyObj = {
     createdAt: keyArr[ 0 ],
@@ -16,7 +14,12 @@ const splitKey = ( key ) => {
   return keyObj
 }
 
+const sortDescUpdatedAt = ( a, b ) => {
+  return  b.updatedAt - a.updatedAt;
+}
+
 module.exports = {
   lastArr: lastArr,
+  sortDescUpdatedAt: sortDescUpdatedAt,
   splitKey: splitKey
 }
