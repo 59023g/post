@@ -1,4 +1,4 @@
-const config = require( '../config.js' );
+const dotenv = require( 'dotenv' ).config();
 const util = require( './util.js' );
 
 // db
@@ -7,15 +7,13 @@ const db_interactor = require( './db_interactor.js' );
 
 // auth
 const auth = require( './auth.js' );
-
+const jwt = require( 'jsonwebtoken' );
 
 // server ( express mostly for the router )
 const app = require( 'express' )();
 const bodyParser = require( 'body-parser' );
 
-app.use( bodyParser.urlencoded( {
-  extended: true
-} ) );
+app.use( bodyParser.urlencoded( { extended: true } ) );
 app.use( bodyParser.json() );
 app.listen( process.env.PORT )
 app.disable('x-powered-by')
@@ -24,20 +22,27 @@ app.disable('x-powered-by')
 const views = require( './views.js' );
 
 
+app.use( auth.verifyToken );
+
+
 // routes
-app.get( '/admin', async function( req, res ) {
-
+app.get( '/login', async function( req, res ) {
   res.send( views.getLoginForm() );
-
 } )
 
-app.post( '/admin', auth.login )
+app.delete( '/admin/user', auth.deleteUser )
+
+app.get( '/admin/', async function( req, res ) {
+  res.send( 'loggedin' );
+} )
+
+// user id?, post id?
+
+app.post( '/admin/login', auth.login )
 
 
 app.get( '/admin/create', async function( req, res ) {
-
   res.send( views.getCreateUserForm() );
-
 } )
 
 app.post( '/admin/create', auth.createUser )
@@ -59,7 +64,7 @@ app.post( '/admin/post/edit', ( req, res ) => {
 } )
 
 app.get( '/', async function( req, res ) {
-
+  console.log('req', req.decoded)
   // todo - some kind of cache
   let results = await db_interactor.getPosts();
   res.send( views.getIndex( results.reverse() ) );
