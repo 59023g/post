@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "",
-    "start": "PORT=8000 node --harmony-async-await --harmony src/index.js",
-    "dev": " PORT=8000 supervisor --w --harmony -- src/index.js "
+    "start": "node --harmony-async-await --harmony src/index.js",
+    "dev": "supervisor --w --harmony -- src/index.js "
   },
   "dependencies": {
     "body-parser": "^1.17.1",
+    "cookie-parser": "^1.4.3",
+    "dotenv": "^4.0.0",
     "express": "^4.15.2",
     "jsonwebtoken": "^7.3.0",
     "level": "^1.6.0",
