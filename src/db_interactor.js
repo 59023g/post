@@ -1,7 +1,4 @@
 const itemsDb = require( '../db.js' ).itemsDb;
-
-
-const config = require( '../config.js' );
 const util = require( './util.js' );
 
 
@@ -80,11 +77,11 @@ const getPosts = async () => {
     itemsDb.createReadStream( )
       .on( 'data', function( item ) {
 
-        console.log( item )
+        // console.log( 'posts', item )
         let keyObj = util.splitKey( item.key )
 
         // get last key put into array
-        let lastKey = util.lastArr( allItemsFilteredByUpdatedAt );
+        let lastKey = util.lastArrItem( allItemsFilteredByUpdatedAt );
 
 
         if ( lastKey ) {
