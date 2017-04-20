@@ -4,10 +4,11 @@ const jwt = require( 'jsonwebtoken' )
 const util = require( './util.js' );
 const usersDb = require( '../db.js' ).usersDb
 
-function getToken(req) {
-  if (req.headers.authorization &&
-      req.headers.authorization.split(' ')[0] === 'Bearer') {
-        return req.headers.authorization.split(' ')[1];
+// http://stackoverflow.com/questions/34589272/how-to-set-authorization-headers-with-nodejs-and-express
+const getToken = ( req ) => {
+  if ( req.headers.authorization &&
+    req.headers.authorization.split( ' ' )[ 0 ] === 'Bearer' ) {
+    return req.headers.authorization.split( ' ' )[ 1 ];
   }
   return null;
 }
@@ -48,13 +49,9 @@ const verifyToken = ( req, res, next ) => {
 };
 
 const deleteUser = async( req, res ) => {
-  // let key =
-
   usersDb.del( '', ( err ) => {
     console.log( 'del' )
-  } )
-
-
+  } );
 }
 
 const updateUser = '';
@@ -153,15 +150,7 @@ const login = async( req, res ) => {
         // latest user item password does not match
         console.log( 'fail' )
       }
-
-
-
-
     } )
-
-
-
-
 }
 
 
