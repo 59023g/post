@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "",
     "start": "node --harmony-async-await --harmony src/index.js",
     "dev": "supervisor --w --harmony -- src/index.js "
   },
