@@ -59,13 +59,15 @@ const updateUser = '';
 const createUser = async( req, res ) => {
 
   let now = Date.now();
-  let user = req.body.user || '';
+  let author = req.body.author || '';
   let pass = req.body.pass || '';
   let email = req.body.email || '';
+  let signingKey = req.body.signingKey || '';
 
-  if ( user === '' || pass === '' ) {
+  if ( author === '' || pass === '' || clientToken === '' ) {
     // TODO dry responses
     // TODO tests
+    // not enough
     res.status( 401 );
     res.json( {
       'status': 401
@@ -74,12 +76,12 @@ const createUser = async( req, res ) => {
   }
 
   return new Promise( ( resolve, reject ) => {
-
     usersDb.put(
       now +
-      '+' + now +
-      '+' + user, {
-        user: user,
+      process.env.SPLIT_VALUE + now +
+      process.env.SPLIT_VALUE + author, {
+        author: author,
+        clientToken: clientToken,
         pass: pass,
         email: email,
         bio: {
@@ -100,14 +102,12 @@ const createUser = async( req, res ) => {
 }
 
 const login = async( req, res ) => {
-  let user = req.body.user || '';
+  let author = req.body.author || '';
   let pass = req.body.pass || '';
 
-  if ( user === '' || pass === '' ) {
-    res.status( 401 );
-    res.json( {
-      'status': 401
-    } )
+  if ( author === '' || pass === '' ) {
+    res.status( 403 );
+    res.json( 'Forbidden')
     return
   }
 
@@ -115,10 +115,12 @@ const login = async( req, res ) => {
 
   usersDb.createReadStream()
     .on( 'data', function( item ) {
+      console.log( 'item', item.value )
       // do the generic split key
       let keyObj = util.splitKey( item.key );
+      console.log(keyObj)
       // if author matches key, push to array for later check
-      if ( user === keyObj.author ) {
+      if ( author === keyObj.author ) {
         allAuthorItems.push( Object.assign( keyObj, item.value ) );
       }
     } )
@@ -132,8 +134,10 @@ const login = async( req, res ) => {
       allAuthorItems.sort( util.sortDescUpdatedAt )
 
       let latestAuthorItem = allAuthorItems[ 0 ]
+
+      console.log( 'latest', latestAuthorItem)
       if ( latestAuthorItem.pass === pass ) {
-        // latest user item password matches
+        // latest author item password matches
         // send token to client
         jwt.sign( {
           foo: 'bar'
@@ -147,7 +151,7 @@ const login = async( req, res ) => {
           } )
         } );
       } else {
-        // latest user item password does not match
+        // latest author item password does not match
         console.log( 'fail' )
       }
     } )
