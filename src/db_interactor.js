@@ -25,8 +25,8 @@ const newPost = async( req ) => {
 
   itemsDb.put(
     now +
-    '+' + now +
-    '+' + author,
+    process.env.SPLIT_VALUE + now +
+    process.env.SPLIT_VALUE + author,
     content,  ( err ) => {
       if ( err ) return console.log( 'err', err )
       return Promise.resolve()
@@ -47,8 +47,8 @@ const updateItem = async( req ) => {
   // now needs to equal the original createdAt of post
   itemsDb.put(
     createdAt +
-    '+' + now +
-    '+' + author,
+    process.env.SPLIT_VALUE + now +
+    process.env.SPLIT_VALUE + author,
     content,  ( err ) => {
       if ( err ) return console.log( 'err', err )
       return Promise.resolve()
