@@ -36,15 +36,42 @@ app.get( '/login', async function( req, res ) {
   res.send( views.getLoginForm() );
 } )
 
-app.delete( '/admin/user', auth.deleteUser )
+app.post( '/auth/login', auth.login )
 
-app.get( '/admin/', async function( req, res ) {
+app.get( '/create', async function( req, res ) {
+  res.send( views.getCreateUserForm() );
+} )
+
+app.post( '/auth/create', auth.createUser )
+
+// index
+app.get( '/', async function( req, res ) {
+  console.log('req', req.decoded)
+  // todo - some kind of cache
+  let results = await db_interactor.getPosts();
+  res.send( views.getIndex( results.reverse() ) );
+} )
+
+// this url is all wildcard
+app.get( '/:author/:createdAt/:updatedAt', async ( req, res ) => {
+
+  let { createdAt, updatedAt, author } = req.params;
+
+  let posts = await db_interactor.getPost( createdAt )
+
+  // passing in updated at as it's the url param key for post to edit
+  res.send( views.getPostView( posts, updatedAt ) );
+} )
+
+
+app.use( auth.verifyToken );
+
+app.get( '/admin', async function( req, res ) {
   res.send( 'loggedin' );
 } )
 
-// user id?, post id?
 
-app.post( '/admin/login', auth.login )
+app.delete( '/admin/user', auth.deleteUser )
 
 
 app.get( '/admin/create', async function( req, res ) {
@@ -67,5 +94,4 @@ app.post( '/admin/post/edit', ( req, res ) => {
   db_interactor.updateItem( req );
   // then
   res.redirect( '/' );
-} )
 } )
