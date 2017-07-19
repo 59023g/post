@@ -25,10 +25,10 @@ const util = require( './util.js' );
         </style>
       </head>
       <body>
-      -> <a href="/admin">admin</a>
-      -> <a href="/admin/create">admin/create</a>
-      -> <a href="/admin/post">admin/post</a>
-      -> <a href="/">items</a>
+      -> <a href="/login">/login</a>
+      -> <a href="/create">/create</a>
+      -> <a href="/admin">/admin</a>
+      -> <a href="/">/</a>
       <br/>
       <br/>
 
@@ -132,14 +132,41 @@ const util = require( './util.js' );
   }
 
   const getCreateUserForm = () => {
+
+
       let form =
         `
           ${ getHead() }
-            create user:
-            <form method='post' action='/admin/create'>
+
+        <script>
+        window.crypto.subtle.generateKey( {
+            name: "HMAC",
+            hash: {
+              name: "SHA-256"
+            }
+          },
+          true, [ "sign", "verify" ]
+        )
+        .then( key => {
+          return window.crypto.subtle.exportKey(
+            "jwk",
+            key
+          )
+        } )
+        .then( results => {
+          let input = document.querySelector( 'input[name=client-token]' )
+          input.setAttribute( "value", results.k )
+        } )
+        .catch( function( err ) {
+          console.error( err );
+        } );
+        </script>
+
+            create admin user:
+            <form method='post' action='/auth/create'>
               <div>
-                user
-                <input type='text' name='user'>
+                author
+                <input type='text' name='author'>
               </div>
               <div>
                 pass
@@ -149,6 +176,7 @@ const util = require( './util.js' );
                 pass again
                 <input type='password' name='pass-dupe'></input>
               </div>
+              <input type="hidden" name="client-token" value="">
               <div>
                 <input type='submit' value='submit'>
               </div>
@@ -160,6 +188,11 @@ const util = require( './util.js' );
   }
 
 const getLoginForm = () => {
+
+    // send an auth token from the server
+    // use that token to sign, but then I need to rememeber it?!
+    // unless it's a public key..
+
     let form =
       `
         ${ getHead() }

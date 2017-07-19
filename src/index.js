@@ -21,12 +21,18 @@ app.disable('x-powered-by')
 // views
 const views = require( './views.js' );
 
-
-app.use( auth.verifyToken );
-
+// routing debugger
+app.use( ( req, res, next ) => {
+  if ( req.url === '/favicon.ico' ) return
+  console.log( 'req.headers', JSON.stringify( req.headers ) )
+  console.log( 'req.url', JSON.stringify( req.url )  )
+  console.log( 'req.method', JSON.stringify( req.method  ) + '\n\n')
+  next()
+} )
 
 // routes
 app.get( '/login', async function( req, res ) {
+
   res.send( views.getLoginForm() );
 } )
 
@@ -62,21 +68,4 @@ app.post( '/admin/post/edit', ( req, res ) => {
   // then
   res.redirect( '/' );
 } )
-
-app.get( '/', async function( req, res ) {
-  console.log('req', req.decoded)
-  // todo - some kind of cache
-  let results = await db_interactor.getPosts();
-  res.send( views.getIndex( results.reverse() ) );
-} )
-
-// this url is all wildcard
-app.get( '/:author/:createdAt/:updatedAt', async ( req, res ) => {
-
-  let { createdAt, updatedAt, author } = req.params;
-
-  let posts = await db_interactor.getPost( createdAt )
-
-  // passing in updated at as it's the url param key for post to edit
-  res.send( views.getPostView( posts, updatedAt ) );
 } )
