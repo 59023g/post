@@ -3,9 +3,47 @@ const util = require( './util.js' );
 
 
 // createUser
-const createUser = async ( req ) => {
+const createUser = async( req, res ) => {
+  let now = Date.now();
+  let author = req.body.author || '';
+  let pass = req.body.pass || '';
+  let email = req.body.email || '';
+  let signingKey = req.body.signingKey || '';
 
+  if ( author === '' || pass === '' || clientToken === '' ) {
+    // TODO dry responses
+    // TODO tests
+    // not enough
+    res.status( 401 );
+    res.json( {
+      'status': 401
+    } )
+    return
+  }
 
+  return new Promise( ( resolve, reject ) => {
+    usersDb.put(
+      now +
+      process.env.SPLIT_VALUE + now +
+      process.env.SPLIT_VALUE + author, {
+        author: author,
+        clientToken: clientToken,
+        pass: pass,
+        email: email,
+        bio: {
+          name: ''
+        }
+      },
+      ( err ) => {
+        if ( err ) return reject( 'err', err )
+        res.status( 200 );
+        res.json( {
+          'status': 200
+        } )
+        resolve()
+      }
+    )
+  } )
 
 }
 
@@ -163,6 +201,7 @@ const getPost = async ( createdAt, updatedAt, author ) => {
 
 
 module.exports = {
+  createUser: createUser,
   newPost: newPost,
   getPosts: getPosts,
   getPost: getPost,
