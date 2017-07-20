@@ -12,11 +12,15 @@ const jwt = require( 'jsonwebtoken' );
 // server ( express mostly for the router )
 const app = require( 'express' )();
 const bodyParser = require( 'body-parser' );
+const cookieParser = require('cookie-parser');
 
 app.use( bodyParser.urlencoded( { extended: true } ) );
 app.use( bodyParser.json() );
 app.listen( process.env.PORT )
 app.disable('x-powered-by')
+// for auth w/o client javascript
+// TODO - js on client, set localStorage
+app.use(cookieParser())
 
 // views
 const views = require( './views.js' );
@@ -26,23 +30,15 @@ app.use( ( req, res, next ) => {
   if ( req.url === '/favicon.ico' ) return
   console.log( 'req.headers', JSON.stringify( req.headers ) )
   console.log( 'req.url', JSON.stringify( req.url )  )
+  console.log( 'req.body', JSON.stringify( req.body )  )
+  console.log( 'req.query', JSON.stringify( req.query )  )
+  console.log( 'req.cookies', JSON.stringify( req.cookies )  )
   console.log( 'req.method', JSON.stringify( req.method  ) + '\n\n')
   next()
 } )
 
+
 // routes
-app.get( '/login', async function( req, res ) {
-
-  res.send( views.getLoginForm() );
-} )
-
-app.post( '/auth/login', auth.login )
-
-app.get( '/create', async function( req, res ) {
-  res.send( views.getCreateUserForm() );
-} )
-
-app.post( '/auth/create', auth.createUser )
 
 // index
 app.get( '/', async function( req, res ) {
@@ -51,6 +47,20 @@ app.get( '/', async function( req, res ) {
   let results = await db_interactor.getPosts();
   res.send( views.getIndex( results.reverse() ) );
 } )
+
+// auth routes
+app.get( '/auth/create', async function( req, res ) {
+  res.send( views.getCreateUserForm() );
+} )
+app.post( '/auth/login', auth.login )
+app.post( '/auth/create', db_interactor.createUser )
+
+
+// login view
+app.get( '/login', async function( req, res ) {
+  res.send( views.getLoginForm() );
+} )
+
 
 // this url is all wildcard
 app.get( '/:author/:createdAt/:updatedAt', async ( req, res ) => {
@@ -78,7 +88,7 @@ app.get( '/admin/create', async function( req, res ) {
   res.send( views.getCreateUserForm() );
 } )
 
-app.post( '/admin/create', auth.createUser )
+app.post( '/admin/create', db_interactor.createUser )
 
 app.get( '/admin/post', ( req, res ) => {
   res.send( views.getForm() );
