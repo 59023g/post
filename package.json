@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node --harmony-async-await --harmony src/index.js",
+    "start": "SPLIT_VALUE=+ node --harmony-async-await --harmony src/index.js",
     "dev": "supervisor --w --harmony -- src/index.js "
   },
   "dependencies": {
