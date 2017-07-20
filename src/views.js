@@ -197,10 +197,10 @@ const getLoginForm = () => {
       `
         ${ getHead() }
           login:
-          <form method='post' action='/admin/login'>
+          <form method='post' action='/auth/login'>
             <div>
               user
-              <input type='text' name='user'>
+              <input type='text' name='author'>
             </div>
             <div>
               pass
