@@ -16,7 +16,7 @@ const getToken = ( req ) => {
 const verifyToken = ( req, res, next ) => {
 
   // check header or url parameters or post parameters for token
-  var token = req.body.token || req.query.token || req.headers[ 'x-access-token' ];
+  var token = req.body.token || req.query.token || req.headers[ 'x-access-token' ] || req.cookies.Token;
 
   // decode token
   if ( token ) {
@@ -56,58 +56,36 @@ const deleteUser = async( req, res ) => {
 
 const updateUser = '';
 
-const createUser = async( req, res ) => {
 
-  let now = Date.now();
-  let author = req.body.author || '';
-  let pass = req.body.pass || '';
-  let email = req.body.email || '';
-  let signingKey = req.body.signingKey || '';
+const setToken = async( req, res ) => {
 
-  if ( author === '' || pass === '' || clientToken === '' ) {
-    // TODO dry responses
-    // TODO tests
-    // not enough
-    res.status( 401 );
-    res.json( {
-      'status': 401
+  jwt.sign( {
+    foo: 'bar'
+  }, process.env.DEV_KEY, {
+    algorithm: 'HS256'
+  }, function( err, token ) {
+    // TODO - if js on client, set localStorage
+
+    // set cookie
+    res.set( 'Authorization', token );
+    res.cookie( 'Token', token, {
+      maxAge: 900000,
+      httpOnly: true
     } )
-    return
-  }
 
-  return new Promise( ( resolve, reject ) => {
-    usersDb.put(
-      now +
-      process.env.SPLIT_VALUE + now +
-      process.env.SPLIT_VALUE + author, {
-        author: author,
-        clientToken: clientToken,
-        pass: pass,
-        email: email,
-        bio: {
-          name: ''
-        }
-      },
-      ( err ) => {
-        if ( err ) return reject( 'err', err )
-        res.status( 200 );
-        res.json( {
-          'status': 200
-        } )
-        resolve()
-      }
-    )
+    res.redirect( '/admin' );
+
   } )
-
 }
 
 const login = async( req, res ) => {
+  console.log( 'login' )
   let author = req.body.author || '';
   let pass = req.body.pass || '';
 
   if ( author === '' || pass === '' ) {
     res.status( 403 );
-    res.json( 'Forbidden')
+    res.json( 'Forbidden' )
     return
   }
 
@@ -115,10 +93,8 @@ const login = async( req, res ) => {
 
   usersDb.createReadStream()
     .on( 'data', function( item ) {
-      console.log( 'item', item.value )
       // do the generic split key
       let keyObj = util.splitKey( item.key );
-      console.log(keyObj)
       // if author matches key, push to array for later check
       if ( author === keyObj.author ) {
         allAuthorItems.push( Object.assign( keyObj, item.value ) );
@@ -128,31 +104,27 @@ const login = async( req, res ) => {
       reject( err )
     } )
     .on( 'end', function() {
-
-
+      console.log( 'allAuthorItems', allAuthorItems )
       // sort by descending updatedAt, so latest is in 0
       allAuthorItems.sort( util.sortDescUpdatedAt )
 
       let latestAuthorItem = allAuthorItems[ 0 ]
 
-      console.log( 'latest', latestAuthorItem)
+      console.log( 'latest', latestAuthorItem )
+      // TODO - abstract out as setToken()
       if ( latestAuthorItem.pass === pass ) {
         // latest author item password matches
         // send token to client
-        jwt.sign( {
-          foo: 'bar'
-        }, process.env.DEV_KEY, {
-          algorithm: 'HS256'
-        }, function( err, token ) {
-          res.json( {
-            success: true,
-            message: 'token',
-            token: token
-          } )
-        } );
+
+        setToken( req, res );
+
       } else {
         // latest author item password does not match
         console.log( 'fail' )
+        res.json( {
+          success: false,
+          message: 'invalid password'
+        } )
       }
     } )
 }
@@ -161,7 +133,6 @@ const login = async( req, res ) => {
 
 module.exports = {
   login: login,
-  createUser: createUser,
   deleteUser: deleteUser,
   verifyToken: verifyToken
 }
