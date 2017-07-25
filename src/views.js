@@ -1,14 +1,14 @@
 const util = require( './util.js' );
 
-  const getFoot = () => {
-    return ( ` </body></html>` )
-  }
+const getFoot = () => {
+  return ( ` </body></html>` )
+}
 
-  const getHead = () => {
+const getHead = () => {
 
-    // todo - selected nav page
-    return (
-      `
+  // todo - selected nav page
+  return (
+    `
       <html>
       <head>
         <style>
@@ -33,41 +33,41 @@ const util = require( './util.js' );
       <br/>
 
       ` )
-  }
+}
 
 
-  const getPostView = ( posts, updatedAt ) => {
+const getPostView = ( posts, updatedAt ) => {
 
-    // for now i'm seeing all posts return in reverse chrono order, so..
-    let filteredArr = posts.reverse();
+  // for now i'm seeing all posts return in reverse chrono order, so..
+  let filteredArr = posts.reverse();
 
-    let history = [];
-    let edit = {}
-    /*
-      input list of all posts with same createdAtkey,
-      return latest
-      if admin, enable editing and history
-    */
+  let history = [];
+  let edit = {}
+  /*
+    input list of all posts with same createdAtkey,
+    return latest
+    if admin, enable editing and history
+  */
 
-    for ( item of filteredArr ) {
+  for ( item of filteredArr ) {
 
-      // TODO edit old items? if createdAt param, send to absolute
-      if ( item.updatedAt === updatedAt ) {
-        edit = item
-      }
+    // TODO edit old items? if createdAt param, send to absolute
+    if ( item.updatedAt === updatedAt ) {
+      edit = item
+    }
 
-      // TODO - some kind of cache so we're not making new calls if editing posts
-      history.push(
-        `
+    // TODO - some kind of cache so we're not making new calls if editing posts
+    history.push(
+      `
         <li>
           ${ item.subject }
           -> <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.author }/${ item.createdAt }/${ item.updatedAt }</a>
         </li>
         `
-      )
-    }
+    )
+  }
 
-    return (
+  return (
     `
       ${ getHead() }
       edit
@@ -81,61 +81,65 @@ const util = require( './util.js' );
       </ul>
       ${ getFoot() }
     `
-    )
+  )
 
-  }
+}
 
+const itemsList = ( items ) => {
 
-  const getIndex = ( items ) => {
-    // arr of rendered posts
+  let list = [];
 
-    let list = [];
+  for ( let item of items ) {
 
-    for ( let item of items ) {
-
-      // put each post into loop
-      list.push(
-        `<li>
+    // put each post into loop
+    list.push(
+      `<li>
           ${ itemToMarkup( item ) }
           <p>
             <a href="${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.author }/${ item.createdAt }/${ item.updatedAt }</a>
           </p>
         </li>
         `
-      )
-    }
+    )
+  }
 
-    // how do i keep selected object loaded on client?
-    // is this the right url format?
-    // how will people create custom, subject based urls, but still get what they want? with lookup by subject?
+  return `${ list.join('') }`
 
-    return (
+}
+
+const getIndex = ( items ) => {
+  // arr of rendered posts
+  // how do i keep selected object loaded on client?
+  // is this the right url format?
+  // how will people create custom, subject based urls, but still get what they want? with lookup by subject?
+
+  return (
     `
       ${ getHead() }
       all items
       <ul>
-        ${ list.join('') }
+      ${ itemsList( items ) }
       </ul>
       ${ getFoot() }
     `
-    )
+  )
 
-  }
+}
 
-  const itemToMarkup = ( item ) => {
-    return (
-      `
+const itemToMarkup = ( item ) => {
+  return (
+    `
         <h4>${ item.subject } by ${ item.author } on ${ item.updatedAt }</h4>
         <p> ${ item.body } </p>
       `
-    )
-  }
+  )
+}
 
-  const getCreateUserForm = () => {
+const getCreateUserForm = () => {
 
 
-      let form =
-        `
+  let form =
+    `
           ${ getHead() }
 
         <script>
@@ -183,18 +187,18 @@ const util = require( './util.js' );
             </form>
           ${ getFoot() }
           `
-      return form
+  return form
 
-  }
+}
 
 const getLoginForm = () => {
 
-    // send an auth token from the server
-    // use that token to sign, but then I need to rememeber it?!
-    // unless it's a public key..
+  // send an auth token from the server
+  // use that token to sign, but then I need to rememeber it?!
+  // unless it's a public key..
 
-    let form =
-      `
+  let form =
+    `
         ${ getHead() }
           login:
           <form method='post' action='/auth/login'>
@@ -212,14 +216,31 @@ const getLoginForm = () => {
           </form>
         ${ getFoot() }
         `
-    return form
+  return form
 
 }
 
-  const getForm = ( ) => {
+const getAdminHead = () => {
+  const view = `
+      -> <a href="/admin/create">/admin/create</a>
+      -> <a href="/admin/post">/admin/post</a>
+      <br>
+      <br>
+    `
+  return view
+}
 
-    let form =
-      `
+const getAdminView = () => {
+  const view = `
+        ${ getForm() }
+    `
+  return view
+}
+
+const getForm = () => {
+
+  let form =
+    `
         ${ getHead() }
           <form method='post' action='/admin/post'>
             <div>
@@ -236,13 +257,13 @@ const getLoginForm = () => {
           </form>
         ${ getFoot() }
         `
-    return form
-  }
+  return form
+}
 
-  const getUpdateForm = ( item ) => {
-    console.log( 'item', item )
-    let form =
-      `
+const getUpdateForm = ( item ) => {
+  console.log( 'item', item )
+  let form =
+    `
           <form method='post' action='/admin/post/edit'>
             <div>
               subj
@@ -261,15 +282,16 @@ const getLoginForm = () => {
             </div>
           </form>
         `
-    return form
-  }
+  return form
+}
 
-  module.exports = {
-    getFoot: getFoot,
-    getPostView: getPostView,
-    getHead: getHead,
-    getIndex: getIndex,
-    getForm: getForm,
-    getCreateUserForm: getCreateUserForm,
-    getLoginForm: getLoginForm
-  }
+module.exports = {
+  getFoot: getFoot,
+  getPostView: getPostView,
+  getHead: getHead,
+  getIndex: getIndex,
+  getAdminView: getAdminView,
+  getForm: getForm,
+  getCreateUserForm: getCreateUserForm,
+  getLoginForm: getLoginForm
+}
