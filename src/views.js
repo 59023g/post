@@ -230,9 +230,12 @@ const getAdminHead = () => {
   return view
 }
 
-const getAdminView = () => {
+const getAdminView = ( items ) => {
   const view = `
         ${ getForm() }
+        <ul>
+        ${ itemsList( items ) }
+        </ul>
     `
   return view
 }
