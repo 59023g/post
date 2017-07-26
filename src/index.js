@@ -77,7 +77,9 @@ app.get( '/:author/:createdAt/:updatedAt', async ( req, res ) => {
 app.use( auth.verifyToken );
 
 app.get( '/admin', async function( req, res ) {
-  res.send( views.getAdminView() );
+  let items = await db_interactor.getPosts();
+
+  res.send( views.getAdminView( items.reverse() ) );
 } )
 
 
