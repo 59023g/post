@@ -73,6 +73,7 @@ const setToken = async( req, res ) => {
       httpOnly: true
     } )
 
+    // save token to user
     res.redirect( '/admin' );
 
   } )
