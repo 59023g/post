@@ -1,4 +1,5 @@
 node_modules
-db
+backups
 npm-debug.log
-.env
+db
+public/media

@@ -1,94 +1,93 @@
 const dotenv = require( 'dotenv' ).config();
-const util = require( './util.js' );
-
-// db
-// const db = require( '../db.js' )
-const db_interactor = require( './db_interactor.js' );
-
-// auth
-const auth = require( './auth.js' );
-const jwt = require( 'jsonwebtoken' );
 
 // server ( express mostly for the router )
-const app = require( 'express' )();
+const express = require( 'express' )
 const bodyParser = require( 'body-parser' );
-const cookieParser = require('cookie-parser');
+const cookieParser = require( 'cookie-parser' );
 
+const app = express()
+app.use( '/public', express.static( process.cwd() + '/public' ) )
 app.use( bodyParser.urlencoded( { extended: true } ) );
 app.use( bodyParser.json() );
 app.listen( process.env.PORT )
-app.disable('x-powered-by')
-// for auth w/o client javascript
-// TODO - js on client, set localStorage
-app.use(cookieParser())
+app.disable( 'x-powered-by' )
+app.use( cookieParser() )
+
+// db
+const db_interactor = require( './db_interactor.js' );
+
+// auth
+const jwt = require( 'jsonwebtoken' );
+const auth = require( './auth.js' );
 
 // views
 const views = require( './views.js' );
 
+// uploads
+const multer = require( 'multer' )
+const upload = multer()
+const processUploads = require( './image_controller.js' )
+
 // routing debugger
 app.use( ( req, res, next ) => {
   if ( req.url === '/favicon.ico' ) return
-  console.log( 'req.headers', JSON.stringify( req.headers ) )
-  console.log( 'req.url', JSON.stringify( req.url )  )
-  console.log( 'req.body', JSON.stringify( req.body )  )
-  console.log( 'req.query', JSON.stringify( req.query )  )
-  console.log( 'req.cookies', JSON.stringify( req.cookies )  )
-  console.log( 'req.method', JSON.stringify( req.method  ) + '\n\n')
+  console.log( JSON.stringify( req.method ), JSON.stringify( req.url ), 'body: ', JSON.stringify( req.body ), 'query: ', JSON.stringify( req.query ), 'cookies:', JSON.stringify( req.cookies ) + '\n' )
   next()
 } )
-
 
 // routes
 
 // index
-app.get( '/', async function( req, res ) {
-  console.log('req', req.decoded)
-  // todo - some kind of cache
+app.get( '/', async function ( req, res ) {
+  // TODO - some kind of cache
   let results = await db_interactor.getPosts();
-  res.send( views.getIndex( results.reverse() ) );
+  return res.send( await views.getIndex( results.reverse(), req.cookies ) );
 } )
 
 // auth routes
-app.get( '/auth/create', async function( req, res ) {
-  res.send( views.getCreateUserForm() );
-} )
 app.post( '/auth/login', auth.login )
-app.post( '/auth/create', db_interactor.createUser )
+
+app.get( '/auth/logout', ( req, res ) => {
+  res.clearCookie( 'Token' )
+  res.clearCookie( 'Author' )
+  res.redirect( '/' )
+} )
+
 
 
 // login view
-app.get( '/login', async function( req, res ) {
+app.get( '/login', async function ( req, res ) {
   res.send( views.getLoginForm() );
 } )
 
 
 // this url is all wildcard
 app.get( '/:author/:createdAt/:updatedAt', async ( req, res ) => {
-
   let { createdAt, updatedAt, author } = req.params;
 
   let posts = await db_interactor.getPost( createdAt )
 
   // passing in updated at as it's the url param key for post to edit
-  res.send( views.getPostView( posts, updatedAt ) );
+  res.send( await views.getPostView( posts, updatedAt, req.cookies ) );
 } )
 
 
 app.use( auth.verifyToken );
 
-app.get( '/admin', async function( req, res ) {
+
+app.get( '/admin', async function ( req, res ) {
   let items = await db_interactor.getPosts();
 
-  res.send( views.getAdminView( items.reverse() ) );
+  res.send( await views.getAdminView( items.reverse(), req.cookies ) );
 } )
 
 
-app.delete( '/admin/user', auth.deleteUser )
-
-
-app.get( '/admin/create', async function( req, res ) {
+app.post( '/auth/create', db_interactor.createUser )
+app.get( '/admin/create', async function ( req, res ) {
   res.send( views.getCreateUserForm() );
 } )
+
+app.delete( '/admin/user', auth.deleteUser )
 
 app.post( '/admin/create', db_interactor.createUser )
 
@@ -107,3 +106,17 @@ app.post( '/admin/post/edit', ( req, res ) => {
   // then
   res.redirect( '/' );
 } )
+
+// only supports images for now
+app.post( '/upload', upload.array( 'file', 12 ), async ( req, res ) => {
+  if ( !req.files )
+    return res.status( 400 ).send( 'No files were uploaded.' );
+
+  try {
+    await processUploads( req )
+    res.redirect( '/admin' )
+  } catch ( error ) {
+    console.error( '/upload error: ', error )
+  }
+
+} );

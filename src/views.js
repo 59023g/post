@@ -1,42 +1,48 @@
 const util = require( './util.js' );
+const fs = require( 'fs' )
+const media_dir = process.env.MEDIADIR
 
 const getFoot = () => {
   return ( ` </body></html>` )
 }
 
-const getHead = () => {
+const isLoggedin = async ( cookies ) => {
+
+  // console.log( 'cookies', cookies )
+  if ( Object.keys( cookies ).length > 0 && cookies.constructor === Object ) {
+    return true
+  } else {
+    return false
+  }
+
+}
+const getHead = ( loggedIn ) => {
 
   // todo - selected nav page
   return (
     `
       <html>
       <head>
-        <style>
-          body {
-            font-family: monospace;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 12px }
-          div, .padding-bottom-8 { padding-bottom: 8px; }
-          ul { padding: 0; list-style-type: none; }
-          input, textarea { width: 100%; }
-          textarea { height: 400px; }
-          img { width: 100%; height: auto; padding: 12px 0;}
-        </style>
+        <title>Michael Pierce</title>
+        <meta charset="UTF-8">
+        <link type='text/css' href='/public/style.css' rel='stylesheet'>
+        <meta content="width=device-width,user-scalable=no" name="viewport">
+        <meta name="google" content="notranslate">
+        <meta http-equiv="Content-Language" content="en">
       </head>
       <body>
-      -> <a href="/login">/login</a>
-      -> <a href="/create">/create</a>
-      -> <a href="/admin">/admin</a>
-      -> <a href="/">/</a>
-      <br/>
-      <br/>
+      <a href="/">home</a>
+      ${ loggedIn ? `| <a href="/auth/logout">logout</a> | <a href="/admin">admin</a>` : ''   }
+      | <h4 style='display: inline'>mep.im</h4>
+      <hr>
 
       ` )
 }
 
 
-const getPostView = ( posts, updatedAt ) => {
+const getPostView = async ( posts, updatedAt, cookies ) => {
+
+  let loggedIn = await isLoggedin( cookies )
 
   // for now i'm seeing all posts return in reverse chrono order, so..
   let filteredArr = posts.reverse();
@@ -69,13 +75,11 @@ const getPostView = ( posts, updatedAt ) => {
 
   return (
     `
-      ${ getHead() }
-      edit
+      ${ getHead( loggedIn ) }
       <ul>
-        ${ getUpdateForm( edit ) }
-        <a href="">edit</a>
+        ${ loggedIn ? getUpdateForm( edit ) : renderPost( edit )  }
       </ul>
-      history
+      <h4>history</h4>
       <ul>
         ${ history.join('') }
       </ul>
@@ -85,40 +89,72 @@ const getPostView = ( posts, updatedAt ) => {
 
 }
 
-const itemsList = ( items ) => {
+const itemToMarkup = ( item, options ) => {
+  return (
+    `
+        <h4>
+          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : item.author }</a> <br> by ${ item.author } on ${ domFormatDate( item.updatedAt ) }
+        </h4>
+        <p> ${ item.body } </p>
+      `
+  )
+}
+
+const itemsList = ( items, options ) => {
+  if ( !options ) options = {}
 
   let list = [];
 
+  // <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">link</a>
+
+  let html = ( item ) => {
+    return list.push(
+      `<li>
+        <h4>
+          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : 'no title' }</a> <br> by ${ item.author } on ${ domFormatDate( item.updatedAt ) }
+        </h4>
+        ${ options.noBody ? '' : `<p> ${ item.body } </p><hr>`}
+
+      </li>
+      `
+    )
+  }
+
   for ( let item of items ) {
 
-    // put each post into loop
-    list.push(
-      `<li>
-          ${ itemToMarkup( item ) }
-          <p>
-            <a href="${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.author }/${ item.createdAt }/${ item.updatedAt }</a>
-          </p>
-        </li>
-        `
-    )
+    // console.log(  item.hiddenFromIndex )
+    if ( !item.hiddenFromIndex && !options.showAll ) {
+      // put each post into loop
+      html( item )
+    }
+
+    if ( options.showAll ) {
+      html( item )
+    }
+
   }
 
   return `${ list.join('') }`
 
 }
 
-const getIndex = ( items ) => {
+const itemsShortList = ( items ) => {
+  let list = []
+
+
+}
+const getIndex = async ( items, cookies ) => {
   // arr of rendered posts
   // how do i keep selected object loaded on client?
   // is this the right url format?
   // how will people create custom, subject based urls, but still get what they want? with lookup by subject?
+  let loggedIn = await isLoggedin( cookies )
 
   return (
     `
-      ${ getHead() }
-      all items
+      ${ getHead( loggedIn ) }
       <ul>
-      ${ itemsList( items ) }
+      ${ itemsList( items, { showAll: false, noBody: false} ) }
       </ul>
       ${ getFoot() }
     `
@@ -126,14 +162,26 @@ const getIndex = ( items ) => {
 
 }
 
-const itemToMarkup = ( item ) => {
-  return (
-    `
-        <h4>${ item.subject } by ${ item.author } on ${ item.updatedAt }</h4>
-        <p> ${ item.body } </p>
-      `
-  )
+// basic date render for HTML
+const domFormatDate = ( date ) => {
+  let test = new Date( +date )
+  testObj = {
+    day: addZeroLeftPad( test.getDate() ),
+    month: addZeroLeftPad( test.getMonth() + 1 ),
+    year: test.getFullYear(),
+    hour: addZeroLeftPad( test.getHours() ),
+    minute: addZeroLeftPad( test.getMinutes() )
+  }
+  let options = { hour12: false, hour: 'numeric' }
+  return `${ testObj.year }/${ testObj.month }/${ testObj.day } ${ testObj.hour }:${ testObj.minute }`
 }
+
+const addZeroLeftPad = ( value ) => {
+  const stringVal = value.toString()
+  if ( stringVal.length === 1 ) return '0' + stringVal
+  return value
+}
+
 
 const getCreateUserForm = () => {
 
@@ -158,7 +206,7 @@ const getCreateUserForm = () => {
           )
         } )
         .then( results => {
-          let input = document.querySelector( 'input[name=client-token]' )
+          let input = document.querySelector( 'input[name=clientToken]' )
           input.setAttribute( "value", results.k )
         } )
         .catch( function( err ) {
@@ -180,7 +228,7 @@ const getCreateUserForm = () => {
                 pass again
                 <input type='password' name='pass-dupe'></input>
               </div>
-              <input type="hidden" name="client-token" value="">
+              <input type="hidden" name="clientToken" value="">
               <div>
                 <input type='submit' value='submit'>
               </div>
@@ -200,7 +248,7 @@ const getLoginForm = () => {
   let form =
     `
         ${ getHead() }
-          login:
+          <h4>login:</h4>
           <form method='post' action='/auth/login'>
             <div>
               user
@@ -222,51 +270,99 @@ const getLoginForm = () => {
 
 const getAdminHead = () => {
   const view = `
-      -> <a href="/admin/create">/admin/create</a>
-      -> <a href="/admin/post">/admin/post</a>
+      <a href="/admin/create">admin/create</a>
+      | <a href="/admin/post">admin/post</a>
       <br>
       <br>
     `
   return view
 }
 
-const getAdminView = ( items ) => {
+const getFiles = async () => {
+
+  let hidden = [ 'original', '.DS_Store' ]
+
+  let files = await fs.readdirSync( media_dir )
+
+  for ( let i = 0; i < hidden.length; i++ ) {
+    let index = files.indexOf( hidden[ i ] )
+    if ( index > -1 ) {
+      files.splice( index, 1 );
+    }
+  }
+
+  return files
+
+}
+
+const getAdminView = async ( items, cookies ) => {
+  let loggedIn = await isLoggedin( cookies )
+
   const view = `
-        ${ getForm() }
+  ${ getHead( loggedIn ) }
+
+        ${ getAdminHead() }
+        ${ getForm( loggedIn ) }
+        ${ await getFiles() }
+
         <ul>
-        ${ itemsList( items ) }
+        ${ itemsList( items, { showAll: true, noBody: true } ) }
         </ul>
     `
   return view
 }
 
-const getForm = () => {
+// react primitives
+const getForm = ( loggedIn ) => {
 
   let form =
     `
-        ${ getHead() }
-          <form method='post' action='/admin/post'>
-            <div>
-              subj
-              <input type='text' name='subject'>
-            </div>
-            <div>
-              body
-              <textarea name='body'></textarea>
-            </div>
-            <div>
-              <input type='submit' value='submit'>
-            </div>
-          </form>
-        ${ getFoot() }
-        `
+      <form method='post' action='/admin/post'>
+        <div>
+          subj
+          <input type='text' name='subject'>
+        </div>
+        <div>
+          body
+          <textarea name='body'></textarea>
+        </div>
+        <div>
+          <input type='submit' value='submit'>
+        </div>
+      </form>
+      <form ref='uploadForm'
+        id='uploadForm'
+        action='/upload'
+        method='post'
+        encType="multipart/form-data">
+          <input type="file" name="file" />
+          <input type="file" name="file" />
+          <input type="file" name="file" />
+          <input type="file" name="file" />
+          <input type="file" name="file" />
+          <input type="file" name="file" />
+          <input type='submit' value='Upload!' />
+      </form>
+    ${ getFoot() }
+    `
   return form
 }
 
+const renderPost = ( item ) => {
+
+  return `
+    <h4>${ item.subject }</h4>
+    <p>${ item.body }</p>
+
+    `
+}
+
 const getUpdateForm = ( item ) => {
-  console.log( 'item', item )
+  // console.log( 'item', item )
   let form =
     `
+    <h4>edit</h4>
+
           <form method='post' action='/admin/post/edit'>
             <div>
               subj
@@ -278,12 +374,26 @@ const getUpdateForm = ( item ) => {
             </div>
             <!-- This is the original creation value of item -->
             <input type="hidden" name="createdAt" value="${ item.createdAt }">
-            <input type="checkbox" id="hiddenFromIndex" value="hiddenFromIndex">
-            <label for="hiddenFromIndex">hiddenFromIndex</label>
+            <input type="checkbox" id="hiddenFromIndex" name="hiddenFromIndex" value="${ item.hiddenFromIndex }">
+            <label for="hiddenFromIndex">hiddenFromIndex ${ item.hiddenFromIndex }</label>
             <div>
               <input type='submit' value='submit'>
             </div>
           </form>
+          <form ref='uploadForm'
+            id='uploadForm'
+            action='/upload'
+            method='post'
+            encType="multipart/form-data">
+            <input type="file" name="file" />
+            <input type="file" name="file" />
+            <input type="file" name="file" />
+            <input type="file" name="file" />
+            <input type="file" name="file" />
+            <input type="file" name="file" />
+              <input type='submit' value='Upload!' />
+          </form>
+
         `
   return form
 }

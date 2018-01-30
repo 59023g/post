@@ -2,7 +2,7 @@ const jwt = require( 'jsonwebtoken' )
 
 // const db = require( '../db_interactor.js' )
 const util = require( './util.js' );
-const usersDb = require( '../db.js' ).usersDb
+const usersDb = require( './db.js' ).usersDb
 
 // http://stackoverflow.com/questions/34589272/how-to-set-authorization-headers-with-nodejs-and-express
 const getToken = ( req ) => {
@@ -22,7 +22,7 @@ const verifyToken = ( req, res, next ) => {
   if ( token ) {
 
     // verifies secret and checks exp
-    jwt.verify( token, process.env.DEV_KEY, function( err, decoded ) {
+    jwt.verify( token, process.env.DEV_KEY, function ( err, decoded ) {
       if ( err ) {
         return res.json( {
           success: false,
@@ -30,7 +30,7 @@ const verifyToken = ( req, res, next ) => {
         } );
       } else {
         // if everything is good, save to request for use in other routes
-        console.log( 'sucess', decoded )
+        // console.log( 'sucess', decoded )
         req.decoded = decoded;
         next();
       }
@@ -48,7 +48,7 @@ const verifyToken = ( req, res, next ) => {
   }
 };
 
-const deleteUser = async( req, res ) => {
+const deleteUser = async ( req, res ) => {
   usersDb.del( '', ( err ) => {
     console.log( 'del' )
   } );
@@ -57,19 +57,24 @@ const deleteUser = async( req, res ) => {
 const updateUser = '';
 
 
-const setToken = async( req, res ) => {
+const setToken = async ( req, res ) => {
 
   jwt.sign( {
     foo: 'bar'
   }, process.env.DEV_KEY, {
     algorithm: 'HS256'
-  }, function( err, token ) {
+  }, function ( err, token ) {
     // TODO - if js on client, set localStorage
 
     // set cookie
     res.set( 'Authorization', token );
     res.cookie( 'Token', token, {
-      maxAge: 900000,
+      maxAge: 9000000,
+      httpOnly: true
+    } )
+
+    res.cookie( 'Author', req.body.author, {
+      maxAge: 9000000,
       httpOnly: true
     } )
 
@@ -79,21 +84,20 @@ const setToken = async( req, res ) => {
   } )
 }
 
-const login = async( req, res ) => {
-  console.log( 'login' )
+const login = async ( req, res ) => {
   let author = req.body.author || '';
   let pass = req.body.pass || '';
 
   if ( author === '' || pass === '' ) {
     res.status( 403 );
-    res.json( 'Forbidden' )
+    res.json( 'Forbidden: 1' )
     return
   }
 
   let allAuthorItems = [];
 
   usersDb.createReadStream()
-    .on( 'data', function( item ) {
+    .on( 'data', function ( item ) {
       // do the generic split key
       let keyObj = util.splitKey( item.key );
       // if author matches key, push to array for later check
@@ -101,31 +105,33 @@ const login = async( req, res ) => {
         allAuthorItems.push( Object.assign( keyObj, item.value ) );
       }
     } )
-    .on( 'error', function( err ) {
+    .on( 'error', function ( err ) {
       reject( err )
     } )
-    .on( 'end', function() {
-      console.log( 'allAuthorItems', allAuthorItems )
+    .on( 'end', function () {
+
+      // author not found
+      if ( allAuthorItems.length === 0 ) {
+        res.status( 403 );
+        res.json( 'Forbidden:2' )
+        return
+      }
+
       // sort by descending updatedAt, so latest is in 0
       allAuthorItems.sort( util.sortDescUpdatedAt )
-
       let latestAuthorItem = allAuthorItems[ 0 ]
 
-      console.log( 'latest', latestAuthorItem )
       // TODO - abstract out as setToken()
       if ( latestAuthorItem.pass === pass ) {
         // latest author item password matches
         // send token to client
-
         setToken( req, res );
-
       } else {
         // latest author item password does not match
         console.log( 'fail' )
-        res.json( {
-          success: false,
-          message: 'invalid password'
-        } )
+        res.status( 403 );
+        res.json( 'Forbidden: 3' )
+        return
       }
     } )
 }
