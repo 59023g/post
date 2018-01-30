@@ -1,0 +1,62 @@
+body {
+  font-family: monospace;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
+  color: #000040;
+  /* darkblue; */
+  background: whitesmoke
+}
+
+div, .padding-bottom-8 {
+  padding-bottom: 8px;
+}
+
+ul {
+  padding: 0;
+  list-style-type: none;
+}
+
+input, textarea {
+  width: 100%;
+}
+
+textarea {
+  height: 400px;
+}
+
+img {
+  width: 100%;
+  height: auto;
+  padding: 12px 0;
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+hr {
+  margin-top: 48px;
+  border: 1px solid grey;
+  border-bottom: 0;
+}
+
+a {
+  color: rgb(10, 27, 62);
+  text-decoration: none;
+  border-bottom: 1px solid rgb(10, 27, 62);
+}
+
+h3 {
+  margin: 36px 0
+}
+
+pre {
+  background: rgb(59, 60, 76);
+  color: white;
+  padding: 18px 0px;
+  font-family: menlo;
+  font-size: 11px;
+  font-weight: bold;
+}

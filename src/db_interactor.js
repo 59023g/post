@@ -1,4 +1,5 @@
-const itemsDb = require( '../db.js' ).itemsDb;
+const itemsDb = require( './db.js' ).itemsDb;
+const usersDb = require( './db.js' ).usersDb;
 const util = require( './util.js' );
 
 
@@ -9,7 +10,9 @@ const createUser = async( req, res ) => {
   let pass = req.body.pass || '';
   let email = req.body.email || '';
   let signingKey = req.body.signingKey || '';
+  let clientToken = req.body.clientToken || '';
 
+  console.log( 'req.body', req.body )
   if ( author === '' || pass === '' || clientToken === '' ) {
     // TODO dry responses
     // TODO tests
@@ -37,9 +40,7 @@ const createUser = async( req, res ) => {
       ( err ) => {
         if ( err ) return reject( 'err', err )
         res.status( 200 );
-        res.json( {
-          'status': 200
-        } )
+        res.redirect( '/' )
         resolve()
       }
     )
@@ -58,7 +59,7 @@ const newPost = async( req ) => {
 
   let content = req.body;
   // is this an id? and is it in the key or body
-  let author = 'mp';
+  let author = req.cookies.Author;
   let now = Date.now();
 
   itemsDb.put(
@@ -79,9 +80,10 @@ const updateItem = async( req ) => {
   // this is the original creation of the post and is the master key for all edits
   let createdAt = req.body.createdAt
   // is this an id? and is it in the key or body
-  let author = 'mp';
+  let author = req.cookies.Author;
   let now = Date.now();
 
+  console.log(' content', content )
   // now needs to equal the original createdAt of post
   itemsDb.put(
     createdAt +
@@ -118,6 +120,7 @@ const getPosts = async () => {
         // console.log( 'posts', item )
         let keyObj = util.splitKey( item.key )
 
+        console.log( 'keyObj', keyObj )
         // get last key put into array
         let lastKey = util.lastArrItem( allItemsFilteredByUpdatedAt );
 
