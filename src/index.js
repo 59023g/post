@@ -14,14 +14,14 @@ app.disable( 'x-powered-by' )
 app.use( cookieParser() )
 
 // db
-const db_interactor = require( './db_interactor.js' );
+const db_controller = require( './db_controller.js' );
 
 // auth
 const jwt = require( 'jsonwebtoken' );
-const auth = require( './auth.js' );
+const auth_controller = require( './auth_controller.js' );
 
-// views
-const views = require( './views.js' );
+// view_controller
+const view_controller = require( './view_controller.js' );
 
 // uploads
 const multer = require( 'multer' )
@@ -35,18 +35,17 @@ app.use( ( req, res, next ) => {
   next()
 } )
 
-// routes
+// TODO - abstract routes
 
 // index
 app.get( '/', async function ( req, res ) {
   // TODO - some kind of cache
-  let results = await db_interactor.getPosts();
-  return res.send( await views.getIndex( results.reverse(), req.cookies ) );
+  let results = await db_controller.getPosts();
+  return res.send( await view_controller.getIndex( results.reverse(), req.cookies ) );
 } )
 
 // auth routes
-app.post( '/auth/login', auth.login )
-
+app.post( '/auth/login', auth_controller.login )
 app.get( '/auth/logout', ( req, res ) => {
   res.clearCookie( 'Token' )
   res.clearCookie( 'Author' )
@@ -54,55 +53,55 @@ app.get( '/auth/logout', ( req, res ) => {
 } )
 
 
-
 // login view
 app.get( '/login', async function ( req, res ) {
-  res.send( views.getLoginForm() );
+  res.send( view_controller.getLoginForm() );
 } )
-
 
 // this url is all wildcard
 app.get( '/:author/:createdAt/:updatedAt', async ( req, res ) => {
   let { createdAt, updatedAt, author } = req.params;
-
-  let posts = await db_interactor.getPost( createdAt )
-
+  let posts = await db_controller.getPost( createdAt )
+  if ( posts.length === 0 ) return res.status( 404 ).json( 'Not Found' )
   // passing in updated at as it's the url param key for post to edit
-  res.send( await views.getPostView( posts, updatedAt, req.cookies ) );
+  return res.send( await view_controller.getPostView( posts, updatedAt, req.cookies ) )
 } )
 
+app.post( '/auth/create', db_controller.createUser )
+app.get( '/admin/create', async function ( req, res ) {
+  res.send( view_controller.getCreateUserForm() );
+} )
 
-app.use( auth.verifyToken );
-
+// everything after this requires auth token
+app.use( auth_controller.verifyToken );
 
 app.get( '/admin', async function ( req, res ) {
-  let items = await db_interactor.getPosts();
-
-  res.send( await views.getAdminView( items.reverse(), req.cookies ) );
+  let items = await db_controller.getPosts();
+  res.send( await view_controller.getAdminView( items.reverse(), req.cookies ) );
 } )
 
 
-app.post( '/auth/create', db_interactor.createUser )
+app.post( '/auth/create', db_controller.createUser )
 app.get( '/admin/create', async function ( req, res ) {
-  res.send( views.getCreateUserForm() );
+  res.send( view_controller.getCreateUserForm() );
 } )
 
-app.delete( '/admin/user', auth.deleteUser )
+app.delete( '/admin/user', auth_controller.deleteUser )
 
-app.post( '/admin/create', db_interactor.createUser )
+app.post( '/admin/create', db_controller.createUser )
 
 app.get( '/admin/post', ( req, res ) => {
-  res.send( views.getForm() );
+  res.send( view_controller.getForm() );
 } )
 
 app.post( '/admin/post', ( req, res ) => {
-  db_interactor.newPost( req );
+  db_controller.newPost( req );
   // then
   res.redirect( '/' );
 } )
 
 app.post( '/admin/post/edit', ( req, res ) => {
-  db_interactor.updateItem( req );
+  db_controller.updateItem( req );
   // then
   res.redirect( '/' );
 } )

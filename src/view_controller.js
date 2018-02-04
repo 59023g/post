@@ -1,9 +1,11 @@
-const util = require( './util.js' );
+// view_controller
+
+const utils = require( './utils.js' );
 const fs = require( 'fs' )
 const media_dir = process.env.MEDIADIR
 
 const getFoot = () => {
-  return ( ` </body></html>` )
+  return ( ` <div>michael pierce 2018 <a href='' target='_blank'>code</a></div></body></html>` )
 }
 
 const isLoggedin = async ( cookies ) => {
@@ -17,7 +19,6 @@ const isLoggedin = async ( cookies ) => {
 
 }
 const getHead = ( loggedIn ) => {
-
   // todo - selected nav page
   return (
     `
@@ -29,13 +30,19 @@ const getHead = ( loggedIn ) => {
         <meta content="width=device-width,user-scalable=no" name="viewport">
         <meta name="google" content="notranslate">
         <meta http-equiv="Content-Language" content="en">
+        <link rel="icon" type="image/png" href="/public/favicon.png" sizes="45x45">
+
       </head>
       <body>
-      <a href="/">home</a>
-      ${ loggedIn ? `| <a href="/auth/logout">logout</a> | <a href="/admin">admin</a>` : ''   }
-      | <h4 style='display: inline'>mep.im</h4>
+      <h4 class='head-ornament' style=''><img style="width: 16px;image-rendering: unset;padding: 0 5px 0 0;" src="/public/favicon.png"><a href="/">/blog</a></h4>
+      ${ loggedIn ? `| <a href="/auth/logout">logout</a> | <a href="/admin">admin</a> ` : ''   }
+
       <hr>
 
+      <div class='left-ornament'>
+        <div></div>
+        <div></div>
+      </div>
       ` )
 }
 
@@ -66,8 +73,8 @@ const getPostView = async ( posts, updatedAt, cookies ) => {
     history.push(
       `
         <li>
-          ${ item.subject }
-          -> <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.author }/${ item.createdAt }/${ item.updatedAt }</a>
+
+          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.author }/${ item.createdAt }/${ item.updatedAt }</a> -> ${ item.subject }
         </li>
         `
     )
@@ -79,26 +86,31 @@ const getPostView = async ( posts, updatedAt, cookies ) => {
       <ul>
         ${ loggedIn ? getUpdateForm( edit ) : renderPost( edit )  }
       </ul>
+
       <h4>history</h4>
       <ul>
         ${ history.join('') }
       </ul>
+      <hr>
       ${ getFoot() }
     `
   )
 
 }
-
-const itemToMarkup = ( item, options ) => {
-  return (
-    `
-        <h4>
-          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : item.author }</a> <br> by ${ item.author } on ${ domFormatDate( item.updatedAt ) }
-        </h4>
-        <p> ${ item.body } </p>
-      `
-  )
-}
+//
+// const itemToMarkup = ( item, options ) => {
+//   return (
+//     `
+//         <h3>
+//           <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : item.author }</a>
+//         </h3>
+//         <h4>
+//           by ${ item.author } on ${ domFormatDate( item.updatedAt ) }
+//         </h4>
+//         <p> ${ item.body } </p>
+//       `
+//   )
+// }
 
 const itemsList = ( items, options ) => {
   if ( !options ) options = {}
@@ -110,9 +122,10 @@ const itemsList = ( items, options ) => {
   let html = ( item ) => {
     return list.push(
       `<li>
-        <h4>
-          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : 'no title' }</a> <br> by ${ item.author } on ${ domFormatDate( item.updatedAt ) }
-        </h4>
+        <h3>
+          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : 'no title' }</a>
+        </h3>
+        <h4>by ${ item.author } on ${ domFormatDate( item.updatedAt ) }</h4>
         ${ options.noBody ? '' : `<p> ${ item.body } </p><hr>`}
 
       </li>
@@ -291,6 +304,7 @@ const getFiles = async () => {
     }
   }
 
+  console.log( files )
   return files
 
 }
@@ -304,7 +318,6 @@ const getAdminView = async ( items, cookies ) => {
         ${ getAdminHead() }
         ${ getForm( loggedIn ) }
         ${ await getFiles() }
-
         <ul>
         ${ itemsList( items, { showAll: true, noBody: true } ) }
         </ul>
@@ -343,7 +356,6 @@ const getForm = ( loggedIn ) => {
           <input type="file" name="file" />
           <input type='submit' value='Upload!' />
       </form>
-    ${ getFoot() }
     `
   return form
 }
@@ -351,9 +363,10 @@ const getForm = ( loggedIn ) => {
 const renderPost = ( item ) => {
 
   return `
-    <h4>${ item.subject }</h4>
+    <h3>${ item.subject }</h3>
     <p>${ item.body }</p>
-
+    <h4>by ${ item.author } on ${ domFormatDate( item.updatedAt ) }</h4>
+    <hr>
     `
 }
 
@@ -374,7 +387,7 @@ const getUpdateForm = ( item ) => {
             </div>
             <!-- This is the original creation value of item -->
             <input type="hidden" name="createdAt" value="${ item.createdAt }">
-            <input type="checkbox" id="hiddenFromIndex" name="hiddenFromIndex" value="${ item.hiddenFromIndex }">
+            <input type="checkbox" id="hiddenFromIndex" name="hiddenFromIndex" value="${ item.hiddenFromIndex ? 'hiddenFromIndex' : ''}">
             <label for="hiddenFromIndex">hiddenFromIndex ${ item.hiddenFromIndex }</label>
             <div>
               <input type='submit' value='submit'>

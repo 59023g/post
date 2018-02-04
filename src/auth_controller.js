@@ -1,8 +1,9 @@
+// auth_controller.js
+
 const jwt = require( 'jsonwebtoken' )
 
-// const db = require( '../db_interactor.js' )
-const util = require( './util.js' );
-const usersDb = require( './db.js' ).usersDb
+const utils = require( './utils.js' );
+const usersDb = require( './db_driver.js' ).usersDb
 
 // http://stackoverflow.com/questions/34589272/how-to-set-authorization-headers-with-nodejs-and-express
 const getToken = ( req ) => {
@@ -99,7 +100,7 @@ const login = async ( req, res ) => {
   usersDb.createReadStream()
     .on( 'data', function ( item ) {
       // do the generic split key
-      let keyObj = util.splitKey( item.key );
+      let keyObj = utils.splitKey( item.key );
       // if author matches key, push to array for later check
       if ( author === keyObj.author ) {
         allAuthorItems.push( Object.assign( keyObj, item.value ) );
@@ -118,7 +119,7 @@ const login = async ( req, res ) => {
       }
 
       // sort by descending updatedAt, so latest is in 0
-      allAuthorItems.sort( util.sortDescUpdatedAt )
+      allAuthorItems.sort( utils.sortDescUpdatedAt )
       let latestAuthorItem = allAuthorItems[ 0 ]
 
       // TODO - abstract out as setToken()

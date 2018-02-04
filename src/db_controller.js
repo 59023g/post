@@ -1,6 +1,9 @@
-const itemsDb = require( './db.js' ).itemsDb;
-const usersDb = require( './db.js' ).usersDb;
-const util = require( './util.js' );
+// db_controller.js
+
+
+const itemsDb = require( './db_driver.js' ).itemsDb;
+const usersDb = require( './db_driver.js' ).usersDb;
+const utils = require( './utils.js' );
 
 
 // createUser
@@ -118,12 +121,10 @@ const getPosts = async () => {
       .on( 'data', function( item ) {
 
         // console.log( 'posts', item )
-        let keyObj = util.splitKey( item.key )
+        let keyObj = utils.splitKey( item.key )
 
-        console.log( 'keyObj', keyObj )
         // get last key put into array
-        let lastKey = util.lastArrItem( allItemsFilteredByUpdatedAt );
-
+        let lastKey = utils.lastArrItem( allItemsFilteredByUpdatedAt );
 
         if ( lastKey ) {
 
@@ -184,7 +185,7 @@ const getPost = async ( createdAt, updatedAt, author ) => {
   itemsDb.createReadStream()
     .on( 'data', function( item ) {
 
-      let keyObj = util.splitKey( item.key )
+      let keyObj = utils.splitKey( item.key )
 
       if ( keyObj.createdAt === createdAt ) {
         // taking keyObj and assigning it to flattened item object
