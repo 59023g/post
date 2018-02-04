@@ -1,3 +1,5 @@
+// utils.js
+
 const lastArrItem = ( arr ) => {
   return arr[arr.length - 1 ];
 }

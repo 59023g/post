@@ -3,3 +3,4 @@ backups
 npm-debug.log
 db
 public/media
+util
