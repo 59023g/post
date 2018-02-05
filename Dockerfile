@@ -5,12 +5,12 @@ MAINTAINER Michael Pierce <hi@mep.im>
 
 # Install Node.js Dependencies
 RUN apt-get update && \
-    apt-get -y install curl git make
+    apt-get -y install curl python2.7 git make g++
 
 RUN git clone https://github.com/tj/n && \
     cd n && \
     make install && \
-    n latest
+    n 8.6.0
 
 # Install nodemon
 RUN npm install -g pm2
@@ -30,4 +30,4 @@ EXPOSE  4000
 # Run app using pm2
 
 RUN /src/node_modules/gulp/bin/gulp.js prod
-CMD ["pm2", "/src/index.js"]
+CMD ["npm", "start"]
