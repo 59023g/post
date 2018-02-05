@@ -80,7 +80,6 @@ app.get( '/admin', async function ( req, res ) {
   res.send( await view_controller.getAdminView( items.reverse(), req.cookies ) );
 } )
 
-
 app.post( '/auth/create', db_controller.createUser )
 app.get( '/admin/create', async function ( req, res ) {
   res.send( view_controller.getCreateUserForm() );

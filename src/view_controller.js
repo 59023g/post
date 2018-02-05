@@ -26,11 +26,11 @@ const getHead = ( loggedIn ) => {
       <head>
         <title>Michael Pierce</title>
         <meta charset="UTF-8">
-        <link type='text/css' href='/public/style.css' rel='stylesheet'>
+        <link type='text/css' href='./public/style.css' rel='stylesheet'>
         <meta content="width=device-width,user-scalable=no" name="viewport">
         <meta name="google" content="notranslate">
         <meta http-equiv="Content-Language" content="en">
-        <link rel="icon" type="image/png" href="/public/favicon.png" sizes="45x45">
+        <link rel="icon" type="image/png" href="./public/favicon.png" sizes="45x45">
 
       </head>
       <body>
