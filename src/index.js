@@ -6,7 +6,7 @@ const bodyParser = require( 'body-parser' );
 const cookieParser = require( 'cookie-parser' );
 
 const app = express()
-app.use( '/public', express.static( process.cwd() + '/public' ) )
+app.use( '/blog/public', express.static( process.cwd() + '/public' ) )
 app.use( bodyParser.urlencoded( { extended: true } ) );
 app.use( bodyParser.json() );
 app.listen( process.env.PORT )
