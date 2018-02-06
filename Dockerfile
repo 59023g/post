@@ -18,6 +18,8 @@ RUN mkdir -p /src && cp -a /tmp/node_modules /src/
 WORKDIR /src
 ADD . /src
 
+RUN mkdir /src/public/media
+
 EXPOSE  4000
 
 CMD ["npm", "start"]

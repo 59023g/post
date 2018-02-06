@@ -5,7 +5,7 @@ const fs = require( 'fs' )
 const media_dir = process.env.MEDIADIR
 
 const getFoot = () => {
-  return ( ` <div>michael pierce 2018 <a href='' target='_blank'>code</a></div></body></html>` )
+  return ( ` <div>michael pierce 2018 <a href='https://github.com/59023g/post' target='_blank'>code</a></div></body></html>` )
 }
 
 const isLoggedin = async ( cookies ) => {
