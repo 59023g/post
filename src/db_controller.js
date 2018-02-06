@@ -43,7 +43,7 @@ const createUser = async( req, res ) => {
       ( err ) => {
         if ( err ) return reject( 'err', err )
         res.status( 200 );
-        res.redirect( '/' )
+        res.redirect( '/blog' )
         resolve()
       }
     )

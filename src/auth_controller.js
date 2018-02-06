@@ -80,7 +80,7 @@ const setToken = async ( req, res ) => {
     } )
 
     // save token to user
-    res.redirect( '/admin' );
+    res.redirect( '/blog/admin' );
 
   } )
 }

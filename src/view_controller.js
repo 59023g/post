@@ -34,8 +34,8 @@ const getHead = ( loggedIn ) => {
 
       </head>
       <body>
-      <h4 class='head-ornament' style=''><img style="width: 16px;image-rendering: unset;padding: 0 5px 0 0;" src="/public/favicon.png"><a href="/">/blog</a></h4>
-      ${ loggedIn ? `| <a href="/auth/logout">logout</a> | <a href="/admin">admin</a> ` : ''   }
+      <h4 class='head-ornament' style=''><img style="width: 16px;image-rendering: unset;padding: 0 5px 0 0;" src="/public/favicon.png"><a href="/blog">/blog</a></h4>
+      ${ loggedIn ? `| <a href="/blog/auth/logout">logout</a> | <a href="/blog/admin">admin</a> ` : ''   }
 
       <hr>
 
@@ -74,7 +74,7 @@ const getPostView = async ( posts, updatedAt, cookies ) => {
       `
         <li>
 
-          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.author }/${ item.createdAt }/${ item.updatedAt }</a> -> ${ item.subject }
+          <a href="blog/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.author }/${ item.createdAt }/${ item.updatedAt }</a> -> ${ item.subject }
         </li>
         `
     )
@@ -123,7 +123,7 @@ const itemsList = ( items, options ) => {
     return list.push(
       `<li>
         <h3>
-          <a href="/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : 'no title' }</a>
+          <a href="/blog/${ item.author }/${ item.createdAt }/${ item.updatedAt }">${ item.subject ? item.subject : 'no title' }</a>
         </h3>
         <h4>by ${ item.author } on ${ domFormatDate( item.updatedAt ) }</h4>
         ${ options.noBody ? '' : `<p> ${ item.body } </p><hr>`}
@@ -228,7 +228,7 @@ const getCreateUserForm = () => {
         </script>
 
             create admin user:
-            <form method='post' action='/auth/create'>
+            <form method='post' action='/blog/auth/create'>
               <div>
                 author
                 <input type='text' name='author'>
@@ -262,7 +262,7 @@ const getLoginForm = () => {
     `
         ${ getHead() }
           <h4>login:</h4>
-          <form method='post' action='/auth/login'>
+          <form method='post' action='/blog/auth/login'>
             <div>
               user
               <input type='text' name='author'>
@@ -283,8 +283,8 @@ const getLoginForm = () => {
 
 const getAdminHead = () => {
   const view = `
-      <a href="/admin/create">admin/create</a>
-      | <a href="/admin/post">admin/post</a>
+      <a href="/blog/admin/create">admin/create</a>
+      | <a href="/blog/admin/post">admin/post</a>
       <br>
       <br>
     `
@@ -330,7 +330,7 @@ const getForm = ( loggedIn ) => {
 
   let form =
     `
-      <form method='post' action='/admin/post'>
+      <form method='post' action='/blog/admin/post'>
         <div>
           subj
           <input type='text' name='subject'>
@@ -345,7 +345,7 @@ const getForm = ( loggedIn ) => {
       </form>
       <form ref='uploadForm'
         id='uploadForm'
-        action='/upload'
+        action='/blog/upload'
         method='post'
         encType="multipart/form-data">
           <input type="file" name="file" />
@@ -376,7 +376,7 @@ const getUpdateForm = ( item ) => {
     `
     <h4>edit</h4>
 
-          <form method='post' action='/admin/post/edit'>
+          <form method='post' action='/blog/admin/post/edit'>
             <div>
               subj
               <input type='text' name='subject' value=${ JSON.stringify( item.subject ) }>
@@ -395,7 +395,7 @@ const getUpdateForm = ( item ) => {
           </form>
           <form ref='uploadForm'
             id='uploadForm'
-            action='/upload'
+            action='/blog/upload'
             method='post'
             encType="multipart/form-data">
             <input type="file" name="file" />
