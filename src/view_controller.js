@@ -26,15 +26,16 @@ const getHead = ( loggedIn ) => {
       <head>
         <title>Michael Pierce</title>
         <meta charset="UTF-8">
-        <link type='text/css' href='/public/style.css' rel='stylesheet'>
+	<base href="https://mep.im/blog/">
+        <link type='text/css' href='./public/style.css' rel='stylesheet'>
         <meta content="width=device-width,user-scalable=no" name="viewport">
         <meta name="google" content="notranslate">
         <meta http-equiv="Content-Language" content="en">
-        <link rel="icon" type="image/png" href="/public/favicon.png" sizes="45x45">
+        <link rel="icon" type="image/png" href="./public/favicon.png" sizes="45x45">
 
       </head>
       <body>
-      <h4 class='head-ornament' style=''><img style="width: 16px;image-rendering: unset;padding: 0 5px 0 0;" src="/public/favicon.png"><a href="/blog">/blog</a></h4>
+      <h4 class='head-ornament' style=''><img style="width: 16px;image-rendering: unset;padding: 0 5px 0 0;" src="./public/favicon.png"><a href="/blog">/blog</a></h4>
       ${ loggedIn ? `| <a href="/blog/auth/logout">logout</a> | <a href="/blog/admin">admin</a> ` : ''   }
 
       <hr>
