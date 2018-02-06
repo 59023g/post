@@ -50,8 +50,14 @@ a {
 }
 
 h3 {
-  margin: 36px 0
+  margin: 36px 0;
+  margin-bottom: 0px;
 }
+h3 a {
+  background: rgb( 250, 234, 174 )
+}
+
+h4 { margin-top: 4px }
 
 pre {
   background: rgb(59, 60, 76);
