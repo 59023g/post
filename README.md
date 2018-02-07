@@ -1,3 +1,5 @@
+In production: https://mep.im/blog
+
 Tired of bloat, and wanting to experiment with an immutable DB structure, I built this. It's still somewhat a work in progress, but suits my needs for now. It does authentication ( using JWT ), state ( leveldb - no separate service like mongo, redis ), and very basic views with media uploads ( no frameworks - just string interpolation ).
 
 I'd be curious to see what others think or add to it. It's open source. I chose leveldb to start off with so easily replicable. As of now, the data is immutable, but it's not chained.
@@ -5,6 +7,8 @@ I'd be curious to see what others think or add to it. It's open source. I chose 
 #### stack
 * node ( express )
 * leveldb
+
+<img src='https://mep.im/blog/public/media/screen_blog.png' width=450>
 
 There is no delete or update in the database. You are effectively allowed to update a DB entry per the schema:
 
